@@ -9,7 +9,7 @@ env:
   PROJECT_ID: project-c51b204d-66f5-4c78-9f0
   REGION: us-central1
   REPOSITORY: cicd-demo
-  SERVICE: cicd-demo
+  SERVICE: github-actions
 
 jobs:
   deploy:
@@ -33,7 +33,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker authentication
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev 
         
 
       - name: Build Docker image
