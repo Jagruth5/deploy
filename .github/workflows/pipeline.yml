@@ -20,7 +20,6 @@ jobs:
       id-token: write
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -28,31 +27,25 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/1058075913260/locations/global/workloadIdentityPools/github--/providers/github
-          service_account: github-actions@project-c51b204d-66f5-4c78-9f0.iam.gserviceaccount.com
-          token_format: access_token
+          service_account: github-actions@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
 
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker authentication
-        run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+        
 
       - name: Build Docker image
-        run: |
-          docker build \
-          -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} \
-          .
+        run: docker build -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} .
 
       - name: Push Docker image
-        run: |
-          docker push \
-          us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }}
+        run: docker push us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE }} \
-          --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} \
-          --region ${{ env.REGION }} \
-          --platform managed \
-          --allow-unauthenticated
+            --image us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/app:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
